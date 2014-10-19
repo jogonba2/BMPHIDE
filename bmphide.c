@@ -20,16 +20,14 @@ char hide_text_estego_object(FILE *fd,char *pixels_image,int offset_metadata_pix
 	fseek(fd,6,SEEK_SET);
 	fwrite(plength_text,4,1,fd);
 	char mask = 0b10000000;
-	int c = 0;
 	for(i=0;i<length_text;i++){
 		for(j=0;j<8;j++){
 			if(((DATA[i] & mask)>>(7-j)&0b00000001)==0) pixels_image[i+j] = pixels_image[i+j] & 0b11111110;
 			else                        				pixels_image[i+j] = pixels_image[i+j] | 0b00000001;
 			mask >>= 1;
-			fseek(fd,j+offset_metadata_pixels+c*8,SEEK_SET);
+			fseek(fd,j+offset_metadata_pixels+i*8,SEEK_SET);
 			fwrite(&pixels_image[i+j],1,1,fd);
 		}
-		c++;
 	}
 	fclose(fd);
     return 1;
