@@ -8,6 +8,7 @@ char* DATA           = "I'm hidden :)";
 char* METHOD         = "";
 char  HIDE           = 0;
 char  EXTRACT        = 0;
+char  NTHREADS       = 2;
 
 char enough_image_size(int num_pixels,char* text_to_hide){
 	int number_bits_text = sizeof(text_to_hide)*8;
@@ -22,18 +23,19 @@ char hide_text_estego_object(FILE *fd,char *pixels_image,int offset_metadata_pix
 	fseek(fd,6,SEEK_SET);
 	fwrite(plength_text,4,1,fd);
 	char mask = 0b10000000;
-	int c = 0;
-	// if(lenght_text>1000)
-	#pragma omp parallel for private(j,mask) 
+	omp_set_num_threads(NTHREADS);
+	#pragma omp parallel for private(j) firstprivate(mask) if(length_text > 200)
 	for(i=0;i<length_text;i++){
 		for(j=0;j<8;j++){
 			if(((DATA[i] & mask)>>(7-j)&0b00000001)==0) pixels_image[i+j] = pixels_image[i+j] & 0b11111110;
 			else                        				pixels_image[i+j] = pixels_image[i+j] | 0b00000001;
 			mask >>= 1;
-			fseek(fd,j+offset_metadata_pixels+c*8,SEEK_SET);
-			fwrite(&pixels_image[i+j],1,1,fd);
+			#pragma omp critical
+			{
+				fseek(fd,j+offset_metadata_pixels+i*8,SEEK_SET);
+				fwrite(&pixels_image[i+j],1,1,fd);
+			}
 		}
-		c++;
 	}
 	fclose(fd);
     return 1;
@@ -43,12 +45,23 @@ char extract_text_estego_object(FILE* fd,int length_unhided,char* unhided,int of
 	char byte_acum = 0b00000000;
 	int i,z=0;
 	char act_pixel;
+	//omp_set_num_threads(NTHREADS);
+	//#pragma omp parallel for firstprivate(act_pixel,z,byte_acum)
 	for(i=0;i<((length_unhided)*8)+1;i++){
+		//#pragma omp critical
+		//{
 		fseek(fd,offset_metadata_pixels+i,SEEK_SET);
 		fread(&act_pixel,1,1,fd);
+		//}	
 		byte_acum  |= act_pixel & 0b00000001;
-		if(i%8==0 && i!=0){ unhided[z++] = byte_acum; byte_acum = 0; }
-		if((i+1)%8!=0) byte_acum <<= 1; 	
+		//#pragma omp ordered if(i%8==0)
+		//{
+		if(i%8==0 && i!=0){ 
+			unhided[z++] = byte_acum; 
+			byte_acum = 0; 
+		}
+		//}
+		if((i+1)%8!=0){ byte_acum <<= 1; }
 	}
 	return 1;
 }
@@ -58,7 +71,7 @@ void show_summary(int num_pixels,int heigth,int width,int length_data){
 }
 
 void usage(){
-	fprintf(stdout,"usage: bmphide in_image method [data_to_hide] \n\t in_image: image required to hide/extract\n\t method: --hide,--extract\n\t data_to_hide: optional if --hide is setted\n\n");
+	fprintf(stdout,"usage: bmphide in_image method [data_to_hide] num_threads\n\t in_image: image required to hide/extract\n\t method: --hide,--extract\n\t data_to_hide: optional if --hide is setted\n\t num_threads: specifies num threads\n");
 }
 
 void header(){
@@ -67,7 +80,7 @@ void header(){
 
 int main(int argc,char* argv[])
 {
-	if(!(argc==3 || argc==4)){ usage(); return -1; }
+	if(!(argc==4 || argc==5)){ usage(); return -1; }
 	header();
 	/** Set with args **/
 	ORIGINAL_IMAGE = argv[1];
@@ -75,12 +88,14 @@ int main(int argc,char* argv[])
 	if(!strcmp(METHOD,"--hide") || !strcmp(METHOD,"--extract")){
 		if(!strcmp(METHOD,"--hide")){
 			HIDE = 1;
-			if(argc!=4){ fprintf(stderr,"[-] Data is require to make hide operation\n"); return 0; }
+			if(argc!=5){ fprintf(stderr,"[-] Data or num_threads are not specified \n"); return 0; }
 			DATA = argv[3];
 		}
 		else                         EXTRACT = 1;	
 	}
 	else{ fprintf(stderr,"[-] Method is not valid\n"); return 0; }
+	if(argc==5) NTHREADS = atoi(argv[4]);
+	else        NTHREADS = atoi(argv[3]);
 	/** GET METADATA BMP **/
 	int offset_metadata_pixels,num_pixels;
 	FILE *fd;
@@ -111,11 +126,12 @@ int main(int argc,char* argv[])
 	
 	/** Read pixels from image **/
 	char image_pixels[num_pixels];
-	int i = offset_metadata_pixels;
-	while(i<offset_metadata_pixels+(length_data*8)){
+	int i;
+	omp_set_num_threads(NTHREADS);
+	#pragma omp parallel for if (length_data>200)
+	for(i=offset_metadata_pixels;i<offset_metadata_pixels+(length_data*8);i++){
 		fseek(fd,i,SEEK_SET);	
 		fread(&image_pixels[i-offset_metadata_pixels],1,1,fd);
-	    i++;
 	}
 	char hidded[length_data];
 	
