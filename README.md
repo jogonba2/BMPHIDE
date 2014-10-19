@@ -22,10 +22,10 @@ Output Hide:
 
 ------------------------ Summary ----------------------------
 
-[!] Num pixels: 262144
-[!] Heigth: 512
-[!] Width: 512
-[!] Length of hidded data: 28
+ [!] Num pixels: 262144
+ [!] Heigth: 512
+ [!] Width: 512
+ [!] Length of hidded data: 28
 
 -------------------------------------------------------------
 
@@ -47,10 +47,10 @@ Output Extract:
 
 ------------------------ Summary ----------------------------
 
-[!] Num pixels: 262144
-[!] Heigth: 512
-[!] Width: 512
-[!] Length of hidded data: 20
+ [!] Num pixels: 262144
+ [!] Heigth: 512
+ [!] Width: 512
+ [!] Length of hidded data: 20
 
 -------------------------------------------------------------
 
