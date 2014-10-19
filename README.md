@@ -13,8 +13,8 @@ usage: bmphide in_image method [data_to_hide]
 
 HIDE
 =======
-Call   Hide:       bmphide Lenna.bmp --hide "This is oculted data"
-Output Hide:       
+bmphide Lenna.bmp --hide "This is oculted data"
+  
 *************************  BMPHIDE  *************************
 *************************************************************
 
@@ -38,8 +38,8 @@ Output Hide:
 Extract
 =======
 
-Call Extract:     bmphide Lenna.bmp --extract
-Output Extract:  
+bmphide Lenna.bmp --extract
+
 *************************  BMPHIDE  *************************
 *************************************************************
 
