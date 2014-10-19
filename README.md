@@ -11,7 +11,8 @@ usage: bmphide in_image method [data_to_hide]
          method: --hide,--extract
          data_to_hide: optional if --hide is setted
 
-
+HIDE
+=======
 Call   Hide:       bmphide Lenna.bmp --hide "This is oculted data"
 Output Hide:       
 *************************  BMPHIDE  *************************
@@ -21,10 +22,10 @@ Output Hide:
 
 ------------------------ Summary ----------------------------
 
- [!] Num pixels: 262144
- [!] Heigth: 512
- [!] Width: 512
- [!] Length of hidded data: 28
+[!] Num pixels: 262144
+[!] Heigth: 512
+[!] Width: 512
+[!] Length of hidded data: 28
 
 -------------------------------------------------------------
 
@@ -34,6 +35,8 @@ Output Hide:
 
 
 
+Extract
+=======
 
 Call Extract:     bmphide Lenna.bmp --extract
 Output Extract:  
@@ -44,10 +47,10 @@ Output Extract:
 
 ------------------------ Summary ----------------------------
 
- [!] Num pixels: 262144
- [!] Heigth: 512
- [!] Width: 512
- [!] Length of hidded data: 20
+[!] Num pixels: 262144
+[!] Heigth: 512
+[!] Width: 512
+[!] Length of hidded data: 20
 
 -------------------------------------------------------------
 
